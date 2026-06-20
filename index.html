@@ -1,0 +1,882 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI PoC Triage and Adoption Planner</title>
+  <style>
+    :root {
+      --bg: #f5f7f8;
+      --panel: #ffffff;
+      --ink: #111827;
+      --muted: #667085;
+      --line: #d0d5dd;
+      --soft: #eef5f7;
+      --accent: #215a6d;
+      --accent-2: #174457;
+      --good: #067647;
+      --warn: #b54708;
+      --bad: #b42318;
+      --shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    aside {
+      background: #ffffff;
+      border-right: 1px solid var(--line);
+      padding: 22px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+
+    main {
+      padding: 28px 34px 44px;
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--accent);
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.08;
+      max-width: 900px;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 19px;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.5;
+      margin: 10px 0 0;
+    }
+
+    .hero {
+      background: linear-gradient(180deg, #ffffff, #f8fbfc);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 26px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+
+    .subtitle {
+      max-width: 980px;
+      font-size: 15px;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .tag {
+      border: 1px solid #c9d7df;
+      background: #f3f8fa;
+      color: #215a6d;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 18px;
+      box-shadow: 0 5px 18px rgba(16, 24, 40, 0.04);
+      margin-bottom: 16px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .metrics {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      margin: 18px 0;
+    }
+
+    .metric {
+      min-height: 142px;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      font-weight: 800;
+    }
+
+    .metric-value {
+      font-size: 38px;
+      font-weight: 850;
+      margin: 8px 0 6px;
+      line-height: 1;
+    }
+
+    .metric-copy {
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.35;
+    }
+
+    .decision {
+      border-left: 4px solid var(--accent);
+      background: #f1f7f9;
+      border-radius: 8px;
+      padding: 15px 18px;
+      margin: 4px 0 18px;
+    }
+
+    .decision strong { color: var(--accent-2); }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      font-size: 12px;
+      color: #344054;
+      font-weight: 760;
+    }
+
+    input[type="text"], textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 10px 11px;
+      color: var(--ink);
+      font: inherit;
+      background: #ffffff;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    .slider-row {
+      display: grid;
+      grid-template-columns: 1fr 34px;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .slider-value {
+      color: var(--accent-2);
+      font-weight: 800;
+      text-align: right;
+      font-size: 13px;
+    }
+
+    details {
+      border-top: 1px solid #eaecf0;
+      padding-top: 10px;
+      margin-top: 12px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 800;
+      color: #344054;
+      font-size: 13px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 12px 0 16px;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #ffffff;
+      color: #344054;
+      padding: 9px 12px;
+      font-weight: 760;
+      cursor: pointer;
+    }
+
+    button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+      gap: 16px;
+    }
+
+    .brief-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .brief-item {
+      border-bottom: 1px solid #eaecf0;
+      padding-bottom: 10px;
+    }
+
+    .brief-item:last-child { border-bottom: 0; padding-bottom: 0; }
+
+    .brief-item b {
+      display: block;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    .brief-item span {
+      line-height: 1.45;
+      color: var(--ink);
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 110px 1fr 42px;
+      gap: 10px;
+      align-items: center;
+      margin: 10px 0;
+      font-size: 13px;
+    }
+
+    .bar-track {
+      height: 12px;
+      border-radius: 999px;
+      background: #eaecf0;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 50%;
+      background: var(--accent);
+      border-radius: 999px;
+    }
+
+    .plan-row {
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 13px 14px;
+      margin-bottom: 10px;
+      background: #ffffff;
+    }
+
+    .plan-row strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    ul {
+      margin-top: 8px;
+      padding-left: 20px;
+      color: var(--ink);
+      line-height: 1.45;
+    }
+
+    li { margin: 5px 0; }
+
+    .prompt {
+      border: 1px solid var(--line);
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12.5px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      overflow: auto;
+      max-height: 280px;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .footer-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 1000px) {
+      .shell { grid-template-columns: 1fr; }
+      aside { position: relative; height: auto; }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="eyebrow">Input</div>
+      <h2>Use-case setup</h2>
+      <label for="sample">Load a sample</label>
+      <select id="sample"></select>
+
+      <label for="title">Use-case title</label>
+      <input id="title" type="text" />
+
+      <label for="businessArea">Business area</label>
+      <input id="businessArea" type="text" />
+
+      <label for="problem">Problem</label>
+      <textarea id="problem"></textarea>
+
+      <label for="workflow">Current workflow</label>
+      <textarea id="workflow"></textarea>
+
+      <label for="approach">Proposed AI approach</label>
+      <textarea id="approach"></textarea>
+
+      <label for="stakeholders">Stakeholders</label>
+      <textarea id="stakeholders"></textarea>
+
+      <label for="dataTypes">Data types</label>
+      <textarea id="dataTypes"></textarea>
+
+      <details open>
+        <summary>Business impact</summary>
+        <div id="impactSliders"></div>
+      </details>
+
+      <details>
+        <summary>Delivery feasibility</summary>
+        <div id="feasibilitySliders"></div>
+      </details>
+
+      <details>
+        <summary>Risk and adoption</summary>
+        <div id="riskSliders"></div>
+      </details>
+    </aside>
+
+    <main>
+      <section class="hero">
+        <div class="eyebrow">AI Transformation Prototype</div>
+        <h1>AI PoC Triage and Adoption Planner</h1>
+        <p class="subtitle">
+          A practical product for deciding which AI ideas deserve a controlled proof-of-concept.
+          It scores business impact, feasibility, responsible AI risk and adoption readiness, then
+          creates a PoC plan, metrics, controls and prompt pack.
+        </p>
+        <div class="tags">
+          <span class="tag">AI experimentation</span>
+          <span class="tag">PoC stage-gates</span>
+          <span class="tag">Copilot rollout</span>
+          <span class="tag">Risk controls</span>
+          <span class="tag">Adoption metrics</span>
+        </div>
+      </section>
+
+      <section class="grid metrics">
+        <div class="panel metric"><div class="metric-label">Readiness</div><div id="readiness" class="metric-value">0</div><div class="metric-copy">Composite score for PoC readiness.</div></div>
+        <div class="panel metric"><div class="metric-label">Impact</div><div id="impact" class="metric-value">0</div><div class="metric-copy">Time saved, quality and strategic value.</div></div>
+        <div class="panel metric"><div class="metric-label">Feasibility</div><div id="feasibility" class="metric-value">0</div><div class="metric-copy">Data, process, tool and user readiness.</div></div>
+        <div class="panel metric"><div class="metric-label">Risk</div><div id="risk" class="metric-value">0</div><div class="metric-copy">Sensitivity, regulation, hallucination and audit burden.</div></div>
+        <div class="panel metric"><div class="metric-label">Adoption</div><div id="adoption" class="metric-value">0</div><div class="metric-copy">Likelihood users understand and keep using it.</div></div>
+      </section>
+
+      <section class="decision">
+        <strong id="decisionTitle">Stage-gate recommendation</strong>
+        <div id="decisionDetail"></div>
+      </section>
+
+      <nav class="tabs" aria-label="Dashboard sections">
+        <button class="active" data-tab="brief">Use-case brief</button>
+        <button data-tab="plan">PoC plan</button>
+        <button data-tab="adoptionTab">Adoption kit</button>
+        <button data-tab="prompts">Prompt pack</button>
+        <button data-tab="summary">Executive summary</button>
+      </nav>
+
+      <section id="brief" class="tab-content active">
+        <div class="two-col">
+          <div class="panel">
+            <h2>Business brief</h2>
+            <div class="brief-list" id="briefList"></div>
+          </div>
+          <div class="panel">
+            <h2>Scoring profile</h2>
+            <div id="barChart"></div>
+            <p class="note">Risk is intentionally separate. A valuable AI idea still needs human review, data controls and adoption evidence before scaling.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="plan" class="tab-content">
+        <div class="panel">
+          <h2>Four-week PoC plan</h2>
+          <div id="planRows"></div>
+        </div>
+        <div class="panel">
+          <h2>Success metrics</h2>
+          <ul id="metricsList"></ul>
+        </div>
+      </section>
+
+      <section id="adoptionTab" class="tab-content">
+        <div class="two-col">
+          <div class="panel">
+            <h2>Required controls</h2>
+            <ul id="controlsList"></ul>
+          </div>
+          <div class="panel">
+            <h2>Adoption materials</h2>
+            <ul>
+              <li>One-page use-case explainer</li>
+              <li>Short walkthrough or demo script</li>
+              <li>FAQ covering scope, limits, escalation and data handling</li>
+              <li>User feedback form with quality and confidence questions</li>
+              <li>Leadership update showing adoption, impact, risks and next decision</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="prompts" class="tab-content">
+        <div class="panel">
+          <h2>LLM prompt pack</h2>
+          <p class="note">These prompts use an LLM as an analyst assistant, not as an unchecked decision-maker. They force structured output, challenge assumptions and tailor communication to different audiences.</p>
+          <div id="promptBlocks"></div>
+        </div>
+      </section>
+
+      <section id="summary" class="tab-content">
+        <div class="panel">
+          <h2>Executive-ready summary</h2>
+          <p id="execSummary"></p>
+          <div class="footer-actions">
+            <button id="copySummary">Copy summary</button>
+            <button id="downloadPack">Download evidence pack</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const samples = [
+      {
+        title: "Copilot assistant for shareholder query summaries",
+        businessArea: "Customer operations",
+        problem: "Service teams spend time reading long case notes and email threads before responding to shareholder or investor-service queries.",
+        workflow: "Analysts manually read historical notes, extract key facts, draft a response, and ask a senior colleague to check sensitive cases.",
+        approach: "Use Microsoft Copilot or an approved internal GenAI assistant to summarise case history, identify missing information, and draft internal response notes for human review.",
+        stakeholders: "Customer service agents, team leaders, compliance, data protection, technology services",
+        dataTypes: "Customer service notes, email text, case metadata, internal knowledge articles",
+        frequency: 8, timeSaved: 7, qualityUplift: 6, strategicAlignment: 8,
+        dataReadiness: 6, processClarity: 8, toolFit: 7, stakeholderReadiness: 7, integrationComplexity: 4,
+        sensitiveData: 8, regulatoryExposure: 7, hallucinationRisk: 6, humanJudgement: 7, auditNeed: 8,
+        trainingNeed: 7, changeComplexity: 6, feedbackChannels: 6
+      },
+      {
+        title: "Corporate actions document obligation extractor",
+        businessArea: "Operations and governance",
+        problem: "Teams need to review long corporate-action or governance documents and identify dates, required actions, exceptions and ownership.",
+        workflow: "Documents are manually read and converted into trackers, with quality depending on reviewer experience and time pressure.",
+        approach: "Use a controlled document-analysis workflow to extract obligations, deadlines, risks and open questions, then route the output to named human reviewers.",
+        stakeholders: "Operations, legal, governance, client-facing teams, risk, technology services",
+        dataTypes: "PDFs, Word documents, policy guidance, meeting notes, action trackers",
+        frequency: 6, timeSaved: 8, qualityUplift: 8, strategicAlignment: 8,
+        dataReadiness: 7, processClarity: 7, toolFit: 8, stakeholderReadiness: 6, integrationComplexity: 5,
+        sensitiveData: 6, regulatoryExposure: 8, hallucinationRisk: 7, humanJudgement: 8, auditNeed: 9,
+        trainingNeed: 6, changeComplexity: 5, feedbackChannels: 6
+      },
+      {
+        title: "Employee share plan FAQ knowledge assistant",
+        businessArea: "Employee share plans",
+        problem: "Employees and support teams may need faster answers to repeated share-plan questions while preserving accuracy and escalation for sensitive cases.",
+        workflow: "Users search FAQs, contact support, or wait for a specialist to interpret policy language.",
+        approach: "Build a retrieval-based assistant over approved FAQ and policy content, with citations, confidence labels and escalation when the question is ambiguous.",
+        stakeholders: "Employee share-plan support, HR clients, legal, compliance, customer operations, technology services",
+        dataTypes: "Approved FAQs, plan documents, policy pages, support transcripts after anonymisation",
+        frequency: 9, timeSaved: 8, qualityUplift: 7, strategicAlignment: 8,
+        dataReadiness: 7, processClarity: 8, toolFit: 8, stakeholderReadiness: 7, integrationComplexity: 5,
+        sensitiveData: 7, regulatoryExposure: 7, hallucinationRisk: 8, humanJudgement: 6, auditNeed: 8,
+        trainingNeed: 7, changeComplexity: 6, feedbackChannels: 7
+      },
+      {
+        title: "Internal AI adoption reporting assistant",
+        businessArea: "Technology services",
+        problem: "AI transformation teams need regular reporting on experiments, adoption, user feedback, blockers and measurable impact.",
+        workflow: "Updates are gathered manually from project notes, spreadsheets, Teams messages and workshop feedback.",
+        approach: "Create a structured reporting workflow that summarises PoC progress, highlights blockers, generates stakeholder updates and flags experiments needing leadership decisions.",
+        stakeholders: "AI Transformation Lead, Chief of Staff, project owners, business sponsors, L&D, communications",
+        dataTypes: "Project trackers, workshop feedback, adoption metrics, survey results, meeting notes",
+        frequency: 7, timeSaved: 7, qualityUplift: 7, strategicAlignment: 9,
+        dataReadiness: 8, processClarity: 7, toolFit: 8, stakeholderReadiness: 8, integrationComplexity: 4,
+        sensitiveData: 4, regulatoryExposure: 4, hallucinationRisk: 5, humanJudgement: 5, auditNeed: 6,
+        trainingNeed: 5, changeComplexity: 4, feedbackChannels: 8
+      }
+    ];
+
+    const sliderGroups = {
+      impactSliders: [
+        ["frequency", "Workflow frequency / volume"],
+        ["timeSaved", "Expected time saving"],
+        ["qualityUplift", "Quality or consistency uplift"],
+        ["strategicAlignment", "Strategic alignment"]
+      ],
+      feasibilitySliders: [
+        ["dataReadiness", "Data readiness"],
+        ["processClarity", "Process clarity"],
+        ["toolFit", "Tool fit"],
+        ["stakeholderReadiness", "Stakeholder readiness"],
+        ["integrationComplexity", "Integration complexity"]
+      ],
+      riskSliders: [
+        ["sensitiveData", "Sensitive data exposure"],
+        ["regulatoryExposure", "Regulatory / client exposure"],
+        ["hallucinationRisk", "Hallucination or unsupported-claim risk"],
+        ["humanJudgement", "Human judgement required"],
+        ["auditNeed", "Audit trail requirement"],
+        ["trainingNeed", "Training need"],
+        ["changeComplexity", "Change complexity"],
+        ["feedbackChannels", "Feedback channels available"]
+      ]
+    };
+
+    function clamp(value, lower = 0, upper = 100) {
+      return Math.max(lower, Math.min(upper, value));
+    }
+
+    function weighted(values, weights) {
+      const total = Object.values(weights).reduce((a, b) => a + b, 0);
+      return Object.keys(weights).reduce((sum, key) => sum + values[key] * weights[key], 0) / total * 10;
+    }
+
+    function currentCase() {
+      const read = id => document.getElementById(id).value;
+      const num = id => Number(document.getElementById(id).value);
+      return {
+        title: read("title"),
+        businessArea: read("businessArea"),
+        problem: read("problem"),
+        workflow: read("workflow"),
+        approach: read("approach"),
+        stakeholders: read("stakeholders"),
+        dataTypes: read("dataTypes"),
+        frequency: num("frequency"),
+        timeSaved: num("timeSaved"),
+        qualityUplift: num("qualityUplift"),
+        strategicAlignment: num("strategicAlignment"),
+        dataReadiness: num("dataReadiness"),
+        processClarity: num("processClarity"),
+        toolFit: num("toolFit"),
+        stakeholderReadiness: num("stakeholderReadiness"),
+        integrationComplexity: num("integrationComplexity"),
+        sensitiveData: num("sensitiveData"),
+        regulatoryExposure: num("regulatoryExposure"),
+        hallucinationRisk: num("hallucinationRisk"),
+        humanJudgement: num("humanJudgement"),
+        auditNeed: num("auditNeed"),
+        trainingNeed: num("trainingNeed"),
+        changeComplexity: num("changeComplexity"),
+        feedbackChannels: num("feedbackChannels")
+      };
+    }
+
+    function scoreUseCase(c) {
+      const impact = weighted(
+        { frequency: c.frequency, timeSaved: c.timeSaved, qualityUplift: c.qualityUplift, strategicAlignment: c.strategicAlignment },
+        { frequency: .24, timeSaved: .30, qualityUplift: .22, strategicAlignment: .24 }
+      );
+      const feasibility = clamp(weighted(
+        { dataReadiness: c.dataReadiness, processClarity: c.processClarity, toolFit: c.toolFit, stakeholderReadiness: c.stakeholderReadiness, integrationComplexity: 10 - c.integrationComplexity },
+        { dataReadiness: .25, processClarity: .21, toolFit: .22, stakeholderReadiness: .17, integrationComplexity: .15 }
+      ));
+      const risk = weighted(
+        { sensitiveData: c.sensitiveData, regulatoryExposure: c.regulatoryExposure, hallucinationRisk: c.hallucinationRisk, humanJudgement: c.humanJudgement, auditNeed: c.auditNeed },
+        { sensitiveData: .22, regulatoryExposure: .24, hallucinationRisk: .21, humanJudgement: .17, auditNeed: .16 }
+      );
+      const adoption = weighted(
+        { stakeholderReadiness: c.stakeholderReadiness, feedbackChannels: c.feedbackChannels, trainingNeed: 10 - c.trainingNeed, changeComplexity: 10 - c.changeComplexity, processClarity: c.processClarity },
+        { stakeholderReadiness: .26, feedbackChannels: .22, trainingNeed: .17, changeComplexity: .17, processClarity: .18 }
+      );
+      const readiness = clamp(.38 * impact + .30 * feasibility + .20 * adoption - .12 * risk + 12);
+
+      let decision = "Prioritise if capacity allows";
+      let detail = "Suitable for backlog review or a small experiment after higher-impact or easier-to-scale opportunities.";
+      if (risk >= 78 && impact < 75) {
+        decision = "Discovery first";
+        detail = "High control burden relative to expected value. Clarify data handling, human ownership and regulatory exposure before building.";
+      } else if (impact >= 72 && feasibility >= 62 && risk <= 68) {
+        decision = "Fast-track controlled PoC";
+        detail = "Strong value and enough feasibility for a limited pilot with clear success metrics and human review.";
+      } else if (impact >= 65 && risk > 68) {
+        decision = "Controlled pilot with governance gate";
+        detail = "Value is promising, but risk controls, auditability and escalation routes must be designed before user rollout.";
+      } else if (feasibility < 55) {
+        decision = "Pre-PoC discovery";
+        detail = "The opportunity may be useful, but the process, data or tooling is not yet ready enough for a reliable pilot.";
+      }
+
+      return {
+        impact: Math.round(impact),
+        feasibility: Math.round(feasibility),
+        risk: Math.round(risk),
+        adoption: Math.round(adoption),
+        readiness: Math.round(readiness),
+        decision,
+        detail
+      };
+    }
+
+    function metrics(c) {
+      const list = [
+        "Time saved per case or workflow cycle",
+        "User adoption rate and repeat usage",
+        "Human-review correction rate",
+        "User confidence / satisfaction score"
+      ];
+      if (c.hallucinationRisk >= 6) list.push("Unsupported claim rate or citation failure rate");
+      if (c.regulatoryExposure >= 6 || c.sensitiveData >= 6) list.push("Number of escalations, policy breaches or blocked unsafe outputs");
+      if (c.qualityUplift >= 7) list.push("Quality score against human-reviewed baseline");
+      return list;
+    }
+
+    function controls(c, s) {
+      const list = [
+        "Human review before external or client-facing use",
+        "Clear scope statement and list of out-of-scope requests",
+        "Feedback channel for users to flag poor outputs",
+        "Named business owner and technical owner for the PoC"
+      ];
+      if (c.sensitiveData >= 6) list.push("Use approved enterprise tools only; avoid pasting sensitive data into public AI systems");
+      if (c.regulatoryExposure >= 6) list.push("Compliance review before pilot expansion");
+      if (c.auditNeed >= 6) list.push("Retain prompts, source references, reviewer decisions and output version history");
+      if (c.hallucinationRisk >= 6) list.push("Require citations or source-grounding for factual claims");
+      if (s.risk >= 75) list.push("Run a red-team style failure review before scaling");
+      return list;
+    }
+
+    function planRows(decision) {
+      return [
+        ["Week 1 - Frame", "Confirm user group, current workflow, data boundaries, success metric and stop criteria.", "One-page PoC charter and risk register."],
+        ["Week 2 - Prototype", "Build a constrained workflow using approved tools and a small representative test set.", "Clickable prototype or workflow demo with prompt / process documentation."],
+        ["Week 3 - Test", "Run side-by-side comparison against the current process with human reviewers.", "Evidence pack: time saved, quality deltas, errors, user feedback and control gaps."],
+        ["Week 4 - Decide", "Present recommendation to scale, iterate, pause or stop.", `Decision memo: ${decision}.`]
+      ];
+    }
+
+    function promptPack(c) {
+      const context = `Use case: ${c.title}
+Business area: ${c.businessArea}
+Problem: ${c.problem}
+Current workflow: ${c.workflow}
+Proposed AI approach: ${c.approach}
+Stakeholders: ${c.stakeholders}
+Data types: ${c.dataTypes}`;
+      return {
+        "Analysis prompt": `You are supporting an enterprise AI transformation team. Analyse the AI use case below. Return structured JSON with: business_value, users_affected, workflow_change, key_risks, required_controls, adoption_barriers, success_metrics, and first_poc_steps. Be practical, conservative about risk, and do not invent facts.\n\n${context}`,
+        "Challenge prompt": `Act as a skeptical risk, compliance, and operations reviewer. Identify the strongest reasons this AI use case could fail or cause harm. For each risk, propose a test or control that could be checked during a four-week PoC.\n\n${context}`,
+        "Comms prompt": `Rewrite this AI use case for three non-technical audiences: a frontline user, a team manager, and a senior leader. For each audience, explain the value, what changes in their workflow, what remains human-owned, and what success looks like.\n\n${context}`,
+        "Measurement prompt": `Design a measurement plan for this AI PoC. Include baseline metric, pilot metric, qualitative feedback question, safety metric, adoption metric, and stop/scale threshold.\n\n${context}`
+      };
+    }
+
+    function executiveSummary(c, s) {
+      return `${c.title} is best treated as '${s.decision}'. The opportunity has an overall readiness score of ${s.readiness}/100, with impact ${s.impact}, feasibility ${s.feasibility}, risk ${s.risk}, and adoption readiness ${s.adoption}. The main value is solving: ${c.problem} The recommended next step is a constrained four-week PoC with named owners, human review, approved tooling, success metrics, and a clear scale / iterate / stop decision gate.`;
+    }
+
+    function colour(value, inverse = false) {
+      if (inverse) {
+        if (value >= 70) return "var(--bad)";
+        if (value >= 45) return "var(--warn)";
+        return "var(--good)";
+      }
+      if (value >= 70) return "var(--good)";
+      if (value >= 45) return "var(--warn)";
+      return "var(--bad)";
+    }
+
+    function setList(id, items) {
+      const element = document.getElementById(id);
+      element.innerHTML = items.map(item => `<li>${item}</li>`).join("");
+    }
+
+    function update() {
+      document.querySelectorAll(".slider-row input[type='range']").forEach(input => {
+        document.querySelector(`[data-value-for='${input.id}']`).textContent = input.value;
+      });
+      const c = currentCase();
+      const s = scoreUseCase(c);
+      const metricMap = [
+        ["readiness", s.readiness, false],
+        ["impact", s.impact, false],
+        ["feasibility", s.feasibility, false],
+        ["risk", s.risk, true],
+        ["adoption", s.adoption, false]
+      ];
+      metricMap.forEach(([id, value, inverse]) => {
+        const el = document.getElementById(id);
+        el.textContent = `${value}/100`;
+        el.style.color = colour(value, inverse);
+      });
+      document.getElementById("decisionTitle").textContent = `Stage-gate recommendation: ${s.decision}`;
+      document.getElementById("decisionDetail").textContent = s.detail;
+
+      const brief = [
+        ["Business area", c.businessArea],
+        ["Problem", c.problem],
+        ["Current workflow", c.workflow],
+        ["AI approach", c.approach],
+        ["Stakeholders", c.stakeholders],
+        ["Data types", c.dataTypes]
+      ];
+      document.getElementById("briefList").innerHTML = brief.map(([label, value]) => `<div class="brief-item"><b>${label}</b><span>${value}</span></div>`).join("");
+
+      const bars = [
+        ["Readiness", s.readiness, false],
+        ["Impact", s.impact, false],
+        ["Feasibility", s.feasibility, false],
+        ["Risk", s.risk, true],
+        ["Adoption", s.adoption, false]
+      ];
+      document.getElementById("barChart").innerHTML = bars.map(([label, value, inverse]) => `
+        <div class="bar-row">
+          <div>${label}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${value}%; background:${colour(value, inverse)};"></div></div>
+          <div><b>${value}</b></div>
+        </div>
+      `).join("");
+
+      document.getElementById("planRows").innerHTML = planRows(s.decision).map(([phase, work, output]) => `
+        <div class="plan-row"><strong>${phase}</strong><div><b>Work:</b> ${work}</div><div><b>Output:</b> ${output}</div></div>
+      `).join("");
+      setList("metricsList", metrics(c));
+      setList("controlsList", controls(c, s));
+      document.getElementById("promptBlocks").innerHTML = Object.entries(promptPack(c)).map(([label, prompt]) => `
+        <h3>${label}</h3><div class="prompt">${prompt}</div>
+      `).join("");
+      document.getElementById("execSummary").textContent = executiveSummary(c, s);
+    }
+
+    function loadSample(index) {
+      const s = samples[index];
+      Object.entries(s).forEach(([key, value]) => {
+        const el = document.getElementById(key);
+        if (el) el.value = value;
+      });
+      update();
+    }
+
+    function init() {
+      const sampleSelect = document.getElementById("sample");
+      samples.forEach((s, index) => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = s.title;
+        sampleSelect.appendChild(option);
+      });
+      Object.entries(sliderGroups).forEach(([containerId, sliders]) => {
+        const container = document.getElementById(containerId);
+        sliders.forEach(([id, label]) => {
+          container.insertAdjacentHTML("beforeend", `
+            <label for="${id}">${label}</label>
+            <div class="slider-row">
+              <input id="${id}" type="range" min="1" max="10" value="5" />
+              <span class="slider-value" data-value-for="${id}">5</span>
+            </div>
+          `);
+        });
+      });
+      sampleSelect.addEventListener("change", event => loadSample(Number(event.target.value)));
+      document.querySelectorAll("input, textarea, select").forEach(element => {
+        element.addEventListener("input", update);
+      });
+      document.querySelectorAll(".tabs button").forEach(button => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
+          document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+          button.classList.add("active");
+          document.getElementById(button.dataset.tab).classList.add("active");
+        });
+      });
+      document.getElementById("copySummary").addEventListener("click", async () => {
+        await navigator.clipboard.writeText(document.getElementById("execSummary").textContent);
+        document.getElementById("copySummary").textContent = "Copied";
+        setTimeout(() => document.getElementById("copySummary").textContent = "Copy summary", 1400);
+      });
+      document.getElementById("downloadPack").addEventListener("click", () => {
+        const c = currentCase();
+        const s = scoreUseCase(c);
+        const pack = {
+          use_case: c,
+          scores: s,
+          metrics: metrics(c),
+          controls: controls(c, s),
+          plan: planRows(s.decision),
+          prompts: promptPack(c),
+          executive_summary: executiveSummary(c, s)
+        };
+        const blob = new Blob([JSON.stringify(pack, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "ai_poc_triage_evidence_pack.json";
+        link.click();
+        URL.revokeObjectURL(url);
+      });
+      loadSample(0);
+    }
+
+    init();
+  </script>
+</body>
+</html>
