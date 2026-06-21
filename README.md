@@ -2,6 +2,8 @@
 
 This is a compact AI transformation prototype built for a Graduate AI Analyst style role. It helps an internal AI team move from "interesting idea" to a structured proof-of-concept decision.
 
+Live demo: https://vedant0410.github.io/computershare-ai-poc-triage-tool/
+
 The tool evaluates an AI use case across four dimensions:
 
 - Business impact
@@ -59,4 +61,3 @@ streamlit run app.py
 - Risk and adoption treated as first-class factors, not afterthoughts.
 - Sample use cases are relevant to financial administration, but generic enough to avoid claiming any internal Computershare information.
 - The prompt pack demonstrates deliberate AI use: task framing, structured outputs, challenge prompts, and adoption messaging.
-
