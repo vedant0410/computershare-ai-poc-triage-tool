@@ -27,6 +27,10 @@ The role asks for practical evidence of using AI to solve a problem, create some
 
 It is intentionally not a generic chatbot. The focus is on structured AI enablement inside a regulated financial-administration environment, where AI ideas need business value, human oversight, auditability, data-sensitivity checks, and measurable adoption.
 
+## Motivation and AI-use approach
+
+I built this because the main challenge in enterprise AI is not only what AI can do, but which ideas deserve to be piloted, how they should be governed, and how adoption should be measured. I used AI as a thinking and building partner to accelerate problem framing, interface structure, scoring logic, sample use cases, and documentation, while keeping the final workflow transparent, human-reviewed, and tied to business outcomes.
+
 ## Files
 
 - `index.html` - polished standalone web app; open directly in a browser.

@@ -5,6 +5,14 @@ For the "Show us how you use AI" prompt, I built a small AI PoC Triage and Adopt
 Live demo: https://vedant0410.github.io/computershare-ai-poc-triage-tool/  
 Code repository: https://github.com/vedant0410/computershare-ai-poc-triage-tool
 
+## Motivation and how I used AI
+
+I chose this artefact because I think the hard part of enterprise AI is no longer simply getting access to powerful tools. The harder question is how an organisation decides which AI ideas are worth testing, how it keeps them safe enough to pilot, how it measures whether they actually improve work, and how it helps people adopt them without creating shadow AI or ungoverned workflows.
+
+That is why I built a triage and adoption planner rather than a generic chatbot. The prototype reflects my view that useful AI work sits between capability and judgement: AI can help generate options, structure analysis, challenge assumptions, summarise evidence, and accelerate prototyping, but humans still need to define the business problem, set constraints, review risks, decide what evidence is enough, and own the final deployment decision.
+
+I used AI as a thinking and building partner in that spirit. It helped me move faster from problem framing to interface structure, scoring logic, sample use cases, prompt-pack design, and documentation. But I deliberately constrained the work around a clear enterprise workflow: transparent scoring, human review checkpoints, risk controls, adoption metrics, and stage-gate decisions. In other words, I tried to use AI not as an answer machine, but as a way to build a more disciplined decision tool.
+
 The problem I wanted to solve is one that an AI transformation team faces often: many AI ideas sound promising, but not all are ready to pilot. Some have high business value but weak data readiness; others are easy to prototype but carry sensitive-data, regulatory, auditability, or adoption risks.
 
 I made the tool specifically relevant to Computershare after reading more about the business. Computershare's own AI insights from its 2025 Industry Conference emphasise alignment before algorithms, regulation as design, attention to shadow AI, different adoption speeds across teams, clear measures of success, training, and a "test, measure, analyze and repeat" approach. The prototype reflects exactly that logic: it does not just ask whether an AI idea is exciting, but whether it has business value, feasible data/process conditions, responsible controls, human review, adoption support, and measurable outcomes.
